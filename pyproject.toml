@@ -1,0 +1,19 @@
+[project]
+name = "backend-workshop-final-projects"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Ahmed Ali", email = "20242018@stud.fci-cu.edu.eg" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "django>=6.1.1",
+]
+
+[project.scripts]
+backend-workshop-final-projects = "backend_workshop_final_projects:main"
+
+[build-system]
+requires = ["uv_build>=0.12.3,<0.13.0"]
+build-backend = "uv_build"
