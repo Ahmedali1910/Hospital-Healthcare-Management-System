@@ -1,4 +1,5 @@
 from django.db import models
+from user.models import User
 
 # Create your models here.
 class Status(models.TextChoices):
@@ -11,12 +12,14 @@ class Department (models.Model):
 
 
 class Doctor (models.Model):
+     user=models.OneToOneField(User,on_delete=models.CASCADE)
      name=models.CharField(max_length=50)
      department_id=models.ForeignKey(Department,on_delete=models.CASCADE)
      phone=models.CharField(max_length=20)
      email=models.EmailField()
 
 class Patient (models.Model):
+    user=models.OneToOneField(User,on_delete=models.CASCADE)
     name=models.CharField(max_length=50)
     age=models.IntegerField()
     phone=models.CharField(max_length=20)
