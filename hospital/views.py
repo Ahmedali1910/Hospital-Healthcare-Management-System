@@ -1,9 +1,9 @@
 from django.shortcuts import render
 
-from rest_framework import viewsets
+from rest_framework import viewsets, filters
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-
+from django_filters.rest_framework import DjangoFilterBackend
 from .models import Patient, Doctor, Appointment,Medical_Consultation,surgery,Follow_UP
 from .serializers import PatientSerializer,DoctorSerializer,AppointmentSerializer,FollowUpSerializer,SurgerySerializer,MedicalConsultationSerializer
 
@@ -40,6 +40,12 @@ class PatientViewset(viewsets.ModelViewSet):
 class DoctorViewset(viewsets.ModelViewSet):
     queryset = Doctor.objects.all()
     serializer_class = DoctorSerializer
+
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_fields = ['department_id__name']
+    search_fields = ['name']
+    ordering_fields = [ 'department_id__name' , 'name']
+    ordering = ['department_id__name', 'name']  # by default, order by department name and then by doctor name
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
