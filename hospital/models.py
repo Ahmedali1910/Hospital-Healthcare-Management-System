@@ -12,11 +12,17 @@ class Department (models.Model):
 
 
 class Doctor (models.Model):
+     STATUS_CHOICES = [
+         ('pending', 'Pending'),
+         ('approved', 'Approved'),
+         ('rejected', 'Rejected'),
+     ]
      user=models.OneToOneField(User,on_delete=models.CASCADE)
      name=models.CharField(max_length=50)
-     department_id=models.ForeignKey(Department,on_delete=models.CASCADE)
+     department_id=models.ForeignKey(Department,on_delete=models.CASCADE,null=True)
      phone=models.CharField(max_length=20)
      email=models.EmailField()
+     status=models.CharField(max_length=20,choices=STATUS_CHOICES,default='pending')
 
 class Patient (models.Model):
     user=models.OneToOneField(User,on_delete=models.CASCADE)

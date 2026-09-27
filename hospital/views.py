@@ -1,19 +1,19 @@
 from django.shortcuts import render
 
 from rest_framework import viewsets, filters
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.decorators import action
 from django_filters.rest_framework import DjangoFilterBackend
-from .models import Patient, Doctor, Appointment,Medical_Consultation,surgery,Follow_UP
-from .serializers import PatientSerializer,DoctorSerializer,AppointmentSerializer,FollowUpSerializer,SurgerySerializer,MedicalConsultationSerializer
+
+from .models import Department, Patient, Doctor, Appointment,Medical_Consultation,surgery,Follow_UP
+from .serializers import DepartmentSerializer, PatientSerializer,DoctorSerializer,AppointmentSerializer,FollowUpSerializer,SurgerySerializer,MedicalConsultationSerializer
 
 from user.permssions import IsAdminRole , IsDoctorRole,IsPatientRole,CanViewPatientRecords,CanViewUpdateRecords
 
 class PatientViewset(viewsets.ModelViewSet):
     serializer_class = PatientSerializer
    
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
 
     def get_permissions(self):
         if self.action == 'create':
@@ -47,19 +47,31 @@ class DoctorViewset(viewsets.ModelViewSet):
     ordering_fields = [ 'department_id__name' , 'name']
     ordering = ['department_id__name', 'name']  # by default, order by department name and then by doctor name
 
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated, IsAdminRole])
+    def pending_doctors(self, request):
+        pending_doctors = Doctor.objects.filter(status='pending')
+        serializer = DoctorSerializer(pending_doctors, many=True)
+        return Response(serializer.data)
 
+    
     def get_permissions(self):
         if self.action == 'create':
             permission_classes = [IsAuthenticated , IsAdminRole ]
         elif self.action in ['retrieve']:
             permission_classes = [IsAuthenticated,(IsAdminRole | IsDoctorRole)]
+        elif self.action == 'list':
+            permission_classes = [AllowAny]
         elif self.action in ['update', 'partial_update']:
             permission_classes = [IsAuthenticated ,(IsDoctorRole | IsAdminRole)]
         elif self.action == 'destroy':
             permission_classes = [IsAuthenticated, IsAdminRole]
-        return [permission() for permission in permission_classes]   
+        return [permission() for permission in permission_classes]  
+
+    def get_queryset(self):
+
+        if self.action == 'list':
+            return Doctor.objects.filter(status='approved')
+        return Doctor.objects.all()
 
 class AppointmentViewset(viewsets.ModelViewSet):
     serializer_class = AppointmentSerializer
@@ -161,3 +173,20 @@ class FollowUpViewset(viewsets.ModelViewSet):
             return Follow_UP.objects.filter(doctor_id__user=user)
         elif user.role == 'Patient':
             return Follow_UP.objects.filter(patient_id__user=user)        
+
+
+class DepartmentViewset(viewsets.ModelViewSet):
+    queryset = Department.objects.all()
+    serializer_class = DepartmentSerializer
+
+    def get_permissions(self):
+        if self.action == 'create':
+            permission_classes = [IsAuthenticated, IsAdminRole]
+        elif self.action in ['list', 'retrieve']:
+            permission_classes = [IsAuthenticated ,(IsAdminRole | IsDoctorRole)]
+        elif self.action in ['update', 'partial_update']:
+            permission_classes = [IsAuthenticated, IsAdminRole]
+        elif self.action == 'destroy':
+            permission_classes = [IsAuthenticated, IsAdminRole]
+        return [permission() for permission in permission_classes]
+        
