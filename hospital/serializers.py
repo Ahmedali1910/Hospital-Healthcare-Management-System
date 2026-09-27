@@ -15,6 +15,15 @@ class AppointmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Appointment
         fields = '__all__'
+    def validate(self, data):
+        doctor = data.get('doctor_id')
+        date = data.get('date')
+        time = data.get('time')
+
+        existing_appointments = Appointment.objects.filter(doctor_id=doctor, date=date, time=time).exclude(status='cancelled').exists()
+        if existing_appointments:
+            raise serializers.ValidationError("The doctor is already booked for this date and time.")
+        return data
 
 class MedicalConsultationSerializer(serializers.ModelSerializer):
     class Meta:
