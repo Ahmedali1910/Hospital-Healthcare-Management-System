@@ -32,7 +32,7 @@ class PatientViewset(viewsets.ModelViewSet):
         if user.role == 'ADMIN':
             return Patient.objects.all()
         elif user.role == 'Doctor':
-            return Patient.objects.filter(doctor_id__user=user)
+            return Patient.objects.filter(doctor__user=user)
         elif user.role == 'Patient':
             return Patient.objects.filter(user=user)
 
@@ -42,10 +42,10 @@ class DoctorViewset(viewsets.ModelViewSet):
     serializer_class = DoctorSerializer
 
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['department_id__name']
+    filterset_fields = ['department__name']
     search_fields = ['name']
-    ordering_fields = [ 'department_id__name' , 'name']
-    ordering = ['department_id__name', 'name']  # by default, order by department name and then by doctor name
+    ordering_fields = [ 'department__name' , 'name']
+    ordering = ['department__name', 'name']  # by default, order by department name and then by doctor name
 
     @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated, IsAdminRole])
     def pending_doctors(self, request):
@@ -76,7 +76,9 @@ class DoctorViewset(viewsets.ModelViewSet):
 class AppointmentViewset(viewsets.ModelViewSet):
     serializer_class = AppointmentSerializer
 
-
+    def perform_create(self, serializer):
+        serializer.save(patient=self.request.user.patient)  # user don't write patient_id in request body, it will be automatically set to the logged-in user
+    
     def get_permissions(self):
         if self.action == 'create':
             permission_classes = [IsAuthenticated,(IsPatientRole | IsAdminRole)]
@@ -94,9 +96,9 @@ class AppointmentViewset(viewsets.ModelViewSet):
             if user.role == 'ADMIN':
                 return Appointment.objects.all()
             elif user.role == 'Doctor':
-                return Appointment.objects.filter(doctor_id__user=user)
+                return Appointment.objects.filter(doctor__user=user)
             elif user.role == 'Patient':
-                return Appointment.objects.filter(patient_id__user=user)
+                return Appointment.objects.filter(patient__user=user)
 
 
 
@@ -120,9 +122,9 @@ class MedicalConsultationViewset(viewsets.ModelViewSet):
             if user.role == 'ADMIN':
                 return Medical_Consultation.objects.all()
             elif user.role == 'Doctor':
-                return Medical_Consultation.objects.filter(doctor_id__user=user)
+                return Medical_Consultation.objects.filter(appointment__doctor__user=user)
             elif user.role == 'Patient':
-                return Medical_Consultation.objects.filter(patient_id__user=user)            
+                return Medical_Consultation.objects.filter(appointment__patient__user=user)            
 
 
 class SurgeryViewset(viewsets.ModelViewSet):
@@ -130,7 +132,7 @@ class SurgeryViewset(viewsets.ModelViewSet):
 
     def get_permissions(self):
         if self.action == 'create':
-            permission_classes = [IsAuthenticated,(IsDoctorRole ,IsAdminRole)]
+            permission_classes = [IsAuthenticated,(IsDoctorRole |IsAdminRole)]
         elif self.action in ['list', 'retrieve']:
             permission_classes = [IsAuthenticated, CanViewUpdateRecords]
         elif self.action in ['update', 'partial_update']:
@@ -145,17 +147,17 @@ class SurgeryViewset(viewsets.ModelViewSet):
         if user.role == 'ADMIN':
             return surgery.objects.all()
         elif user.role == 'Doctor':
-            return surgery.objects.filter(doctor_id__user=user)
+            return surgery.objects.filter(medical_consultation__appointment__doctor__user=user)
         elif user.role == 'Patient':
-            return surgery.objects.filter(patient_id__user=user)
+            return surgery.objects.filter(medical_consultation__appointment__patient__user=user)
 
 class FollowUpViewset(viewsets.ModelViewSet): 
     serializer_class = FollowUpSerializer
-
+        
     def get_permissions(self): 
         
         if self.action == 'create':
-            permission_classes = [IsAuthenticated,(IsDoctorRole ,IsAdminRole)]
+            permission_classes = [IsAuthenticated,(IsDoctorRole | IsAdminRole)]
         elif self.action in ['list', 'retrieve']:
             permission_classes = [IsAuthenticated, CanViewUpdateRecords]
         elif self.action in ['update', 'partial_update']:
@@ -170,9 +172,9 @@ class FollowUpViewset(viewsets.ModelViewSet):
         if user.role == 'ADMIN':
             return Follow_UP.objects.all()
         elif user.role == 'Doctor':
-            return Follow_UP.objects.filter(doctor_id__user=user)
+            return Follow_UP.objects.filter(medical_consultation__appointment__doctor__user=user)
         elif user.role == 'Patient':
-            return Follow_UP.objects.filter(patient_id__user=user)        
+            return Follow_UP.objects.filter(medical_consultation__appointment__patient__user=user)        
 
 
 class DepartmentViewset(viewsets.ModelViewSet):

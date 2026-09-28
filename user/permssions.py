@@ -1,5 +1,5 @@
 from rest_framework.permissions import BasePermission
-
+from hospital.models import Follow_UP,surgery,Medical_Consultation,Appointment
 class IsAdminRole(BasePermission):
     message = "Access denied. Admin role required."
 
@@ -11,8 +11,6 @@ class IsDoctorRole (BasePermission):
 
     def has_permission(self, request, view):
         return bool(request.user and request.user.is_authenticated and request.user.role =='Doctor' and request.user.doctor.status == 'approved')
-    def has_object_permission(self, request, view, obj):
-        return  obj.user == request.user
 
 class IsPatientRole (BasePermission):
     message = "Access denied. Patient role required."
@@ -34,7 +32,7 @@ class CanViewPatientRecords(BasePermission):
             return True
         
         elif request.user.role == 'Doctor':
-            return obj.doctor_id.user == request.user
+            return obj.doctor.user == request.user
 
         return False    
 
@@ -47,11 +45,31 @@ class CanViewUpdateRecords(BasePermission):
     def has_object_permission(self, request, view, obj):
         if request.user.role == 'ADMIN':
             return True
-        
-        elif request.user.role == 'Doctor':
-            return obj.doctor_id.user == request.user
 
-        elif request.user.role == 'Patient':
-            return obj.patient_id.user == request.user
+        if isinstance (obj,Appointment):
+            if request.user.role=='Patient':
+               return obj.patient.user==request.user
+            if request.user.role == 'Doctor':
+                return obj.doctor.user == request.user
+        elif isinstance(obj, Medical_Consultation):
+            if request.user.role == 'Doctor':
+                return obj.appointment.doctor.user == request.user
+
+            if request.user.role == 'Patient':
+                return obj.appointment.patient.user == request.user
+
+        elif isinstance(obj, Follow_UP):
+            if request.user.role == 'Doctor':
+                return obj.medical_consultation.appointment.doctor.user == request.user
+
+            if request.user.role == 'Patient':
+                return obj.medical_consultation.appointment.patient.user == request.user
+
+        elif isinstance(obj, surgery):
+            if request.user.role == 'Doctor':
+                return obj.medical_consultation.appointment.doctor.user == request.user
+
+            if request.user.role == 'Patient':
+                return obj.medical_consultation.appointment.patient.user == request.user
 
         return False    
