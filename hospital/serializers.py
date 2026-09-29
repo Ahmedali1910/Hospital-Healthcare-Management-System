@@ -15,7 +15,7 @@ class AppointmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Appointment
         fields = '__all__'
-    def validate(self, data):
+    def validate(self, data): # I use it to ensure that the appointment has not been assigned to another patient.
         doctor = data.get('doctor')
         date = data.get('date')
         time = data.get('time')
@@ -30,7 +30,7 @@ class MedicalConsultationSerializer(serializers.ModelSerializer):
         model = Medical_Consultation
         fields = '__all__' 
 
-    def validate(self, data):
+    def validate(self, data):# I use it specifically when the `action` value is 'create' to ensure that the doctor is the same one assigned to the appointment.
       appointment = data['appointment']
       request=self.context['request']
       if request.user.role != 'ADMIN':
@@ -45,7 +45,7 @@ class SurgerySerializer(serializers.ModelSerializer):
         model = surgery
         fields = '__all__'  
 
-    def validate(self, data):
+    def validate(self, data):# I use it specifically when the `action` value is 'create' to ensure that the doctor is the same one assigned to the appointment.
         medical_consultation = data['medical_consultation']
         request = self.context['request']
 
@@ -62,7 +62,7 @@ class FollowUpSerializer(serializers.ModelSerializer):
         model = Follow_UP
         fields = '__all__'
 
-    def validate(self,data):
+    def validate(self,data):# I use it specifically when the `action` value is 'create' to ensure that the doctor is the same one assigned to the appointment.
         medical_consultation = data['medical_consultation']   
         request=self.context['request']
         if request.user.role != 'ADMIN':
