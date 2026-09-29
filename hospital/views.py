@@ -29,7 +29,7 @@ class PatientViewset(viewsets.ModelViewSet):
     def get_queryset(self):
         user=self.request.user
 
-        if user.role == 'ADMIN':
+        if user.role == 'Admin':
             return Patient.objects.all()
         elif user.role == 'Doctor':
             return Patient.objects.filter(doctor__user=user)
@@ -57,9 +57,7 @@ class DoctorViewset(viewsets.ModelViewSet):
     def get_permissions(self):
         if self.action == 'create':
             permission_classes = [IsAuthenticated , IsAdminRole ]
-        elif self.action in ['retrieve']:
-            permission_classes = [IsAuthenticated,(IsAdminRole | IsDoctorRole)]
-        elif self.action == 'list':
+        elif self.action in ['list','retrieve']:
             permission_classes = [AllowAny]
         elif self.action in ['update', 'partial_update']:
             permission_classes = [IsAuthenticated ,(IsDoctorRole | IsAdminRole)]

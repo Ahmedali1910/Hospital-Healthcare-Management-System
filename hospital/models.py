@@ -21,7 +21,6 @@ class Doctor (models.Model):
      name=models.CharField(max_length=50)
      department=models.ForeignKey(Department,on_delete=models.CASCADE,null=True) #frontend will send department_id in request body because the doctor choose the department after creating the doctor.
      phone=models.CharField(max_length=20)
-     email=models.EmailField()
      status=models.CharField(max_length=20,choices=STATUS_CHOICES,default='pending')
 
 class Patient (models.Model):
