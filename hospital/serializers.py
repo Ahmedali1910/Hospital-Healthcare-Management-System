@@ -2,14 +2,34 @@ from rest_framework import serializers
 from .models import Department, Patient, Doctor, Appointment,Medical_Consultation,surgery,Follow_UP
 
 class PatientSerializer(serializers.ModelSerializer):
-    class Meta:
+    
+     username = serializers.CharField(
+        source='user.username',
+        read_only=True
+    )
+
+     email = serializers.EmailField(
+        source='user.email',
+        read_only=True
+    )
+     class Meta:
         model = Patient
-        fields = '__all__'
+        fields = ['id', 'username', 'email', 'name', 'age', 'phone','doctor']
 
 class DoctorSerializer(serializers.ModelSerializer):
-    class Meta:
+     username = serializers.CharField(
+        source='user.username',
+        read_only=True
+    )
+
+     email = serializers.EmailField(
+        source='user.email',
+        read_only=True
+    )
+    
+     class Meta:
         model = Doctor
-        fields = '__all__'        
+        fields = ['id', 'username', 'email', 'name', 'department', 'phone']   
 
 class AppointmentSerializer(serializers.ModelSerializer):
     class Meta:
