@@ -25,8 +25,9 @@ class IsDoctorRole (BasePermission):
                 return obj.doctor.user==request.user
         elif isinstance (obj,Medical_Consultation):
                 return obj.appointment.doctor.user==request.user
-        elif isinstance (obj,surgery):
+        elif isinstance (obj,(surgery,Follow_UP)):
                 return obj.medical_consultation.appointment.doctor.user==request.user
+        
         
     
 class IsPatientRole (BasePermission):
@@ -57,7 +58,7 @@ class CanViewPatientRecords(BasePermission):
         return False    
 
 class CanViewUpdateRecords(BasePermission):
-    message = "Access denied. You do not have permission to view appointment records."
+    message = "Access denied. You do not have permission."
 
     def has_permission(self, request, view):
         return bool(request.user.role == 'Admin' or (request.user.role == 'Doctor' and request.user.doctor.status == 'approved') or request.user.role == 'Patient')
@@ -71,14 +72,15 @@ class CanViewUpdateRecords(BasePermission):
                return obj.patient.user==request.user
             elif request.user.role == 'Doctor':
                 return obj.doctor.user == request.user
+            return False
             
         elif isinstance(obj, Medical_Consultation):
             if request.user.role == 'Doctor':
                 return obj.appointment.doctor.user == request.user
 
-        elif request.user.role == 'Patient':
-            if view.action in ['retrieve']:
-               return obj.appointment.patient.user == request.user
+            elif request.user.role == 'Patient':
+                if view.action in ['retrieve']:
+                   return obj.appointment.patient.user == request.user
 
             return False
 
@@ -86,9 +88,9 @@ class CanViewUpdateRecords(BasePermission):
             if request.user.role == 'Doctor':
                 return obj.medical_consultation.appointment.doctor.user == request.user
 
-        elif request.user.role == 'Patient':
-            if view.action in ['retrieve']:
-               return obj.medical_consultation.appointment.patient.user == request.user
+            elif request.user.role == 'Patient':
+                if view.action in ['retrieve']:
+                    return obj.medical_consultation.appointment.patient.user == request.user
 
             return False
 
@@ -96,9 +98,9 @@ class CanViewUpdateRecords(BasePermission):
             if request.user.role == 'Doctor':
                 return obj.medical_consultation.appointment.doctor.user == request.user
 
-        elif request.user.role == 'Patient':
-            if view.action in ['retrieve']:
-               return obj.medical_consultation.appointment.patient.user == request.user
+            elif request.user.role == 'Patient':
+                if view.action in ['retrieve']:
+                  return obj.medical_consultation.appointment.patient.user == request.user
 
             return False
 

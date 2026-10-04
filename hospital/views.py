@@ -252,7 +252,7 @@ class MedicalConsultationViewset(viewsets.ModelViewSet):
     def get_queryset(self):
             user=self.request.user
     
-            if user.role == 'ADMIN':
+            if user.role == 'Admin':
                 return Medical_Consultation.objects.all()
             elif user.role == 'Doctor':
                 return Medical_Consultation.objects.filter(appointment__doctor__user=user)
@@ -277,7 +277,7 @@ class SurgeryViewset(viewsets.ModelViewSet):
     def get_queryset(self):     
         user=self.request.user
     
-        if user.role == 'ADMIN':
+        if user.role == 'Admin':
             return surgery.objects.all()
         elif user.role == 'Doctor':
             return surgery.objects.filter(medical_consultation__appointment__doctor__user=user)
@@ -294,7 +294,7 @@ class FollowUpViewset(viewsets.ModelViewSet):
         elif self.action in ['list', 'retrieve']:
             permission_classes = [IsAuthenticated, CanViewUpdateRecords]
         elif self.action in ['update', 'partial_update']:
-            permission_classes = [IsAuthenticated, CanViewUpdateRecords]
+            permission_classes = [IsAuthenticated, IsDoctorRole|IsAdminRole]
         elif self.action == 'destroy':
             permission_classes = [IsAuthenticated, IsAdminRole]
         return [permission() for permission in permission_classes]
@@ -302,7 +302,7 @@ class FollowUpViewset(viewsets.ModelViewSet):
     def get_queryset(self):
         user=self.request.user
     
-        if user.role == 'ADMIN':
+        if user.role == 'Admin':
             return Follow_UP.objects.all()
         elif user.role == 'Doctor':
             return Follow_UP.objects.filter(medical_consultation__appointment__doctor__user=user)

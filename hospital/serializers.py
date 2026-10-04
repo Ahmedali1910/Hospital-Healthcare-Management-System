@@ -138,8 +138,11 @@ class FollowUpSerializer(serializers.ModelSerializer):
         model = Follow_UP
         fields = '__all__'
 
-    def validate(self,data):# I use it specifically when the `action` value is 'create' to ensure that the doctor is the same one assigned to the appointment.
-        medical_consultation = data['medical_consultation']   
+    def validate(self,data):# I use it specifically when the `action` value is 'create' and 'update' to ensure that the doctor is the same one assigned to the appointment.
+        medical_consultation = data.get(
+            'medical_consultation',
+            self.instance.medical_consultation if self.instance else None
+        )
         request=self.context['request']
         if request.user.role != 'ADMIN':
             if medical_consultation.appointment.doctor.user != request.user:
