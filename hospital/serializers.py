@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Department, Patient, Doctor, Appointment,Medical_Consultation,surgery,Follow_UP
+from .models import Department, Patient, Doctor, Appointment,Medical_Consultation, Status,surgery,Follow_UP
 
 class PatientSerializer(serializers.ModelSerializer):
     
@@ -48,18 +48,52 @@ class DoctorAdminSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'email', 'name', 'department', 'phone','status']        
 
 class AppointmentSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Appointment
-        fields = '__all__'
-    def validate(self, data): # I use it to ensure that the appointment has not been assigned to another patient.
-        doctor = data.get('doctor')
-        date = data.get('date')
-        time = data.get('time')
+        fields = [
+            'id',
+            'doctor',
+            'date',
+            'time',
+            'status',
+        ]
 
-        existing_appointments = Appointment.objects.filter(doctor=doctor, date=date, time=time).exclude(status='Cancelled').exists()
-        if existing_appointments:
-            raise serializers.ValidationError("The doctor is already booked for this date and time.")
+        read_only_fields = ['id', 'status']
+
+    def validate(self, data):
+
+        doctor = data.get(
+            'doctor',
+            self.instance.doctor if self.instance else None
+        )
+
+        date = data.get(
+            'date',
+            self.instance.date if self.instance else None
+        )
+
+        time = data.get(
+            'time',
+            self.instance.time if self.instance else None
+        )
+
+        if Appointment.objects.filter(
+            doctor=doctor,
+            date=date,
+            time=time,
+        ).exclude(
+            id=self.instance.id if self.instance else None
+        ).exclude(
+            status=Status.CANCELLED
+        ).exists():
+
+            raise serializers.ValidationError(
+                "The doctor is already booked for this date and time."
+            )
+
         return data
+    
 
 class MedicalConsultationSerializer(serializers.ModelSerializer):
     class Meta:

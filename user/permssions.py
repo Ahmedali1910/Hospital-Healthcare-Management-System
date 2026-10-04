@@ -1,5 +1,5 @@
 from rest_framework.permissions import BasePermission
-from hospital.models import Follow_UP,surgery,Medical_Consultation,Appointment
+from hospital.models import Doctor, Follow_UP, Patient,surgery,Medical_Consultation,Appointment
 class IsAdminRole(BasePermission):
     message = "Access denied. Admin role required."
 
@@ -19,7 +19,10 @@ class IsDoctorRole (BasePermission):
     def has_permission(self, request, view):
         return bool(request.user.role =='Doctor' and request.user.doctor.status == 'approved')
     def has_object_permission(self, request, view, obj):
-        return obj.user == request.user
+        if isinstance(obj,Doctor):
+                return obj.user == request.user
+        if isinstance (obj,Appointment):
+                return obj.doctor.user==request.user
     
 class IsPatientRole (BasePermission):
     message = "Access denied. Patient role required."
@@ -28,7 +31,10 @@ class IsPatientRole (BasePermission):
         return bool(request.user.role =='Patient')
 
     def has_object_permission(self, request, view, obj):
-        return  obj.user == request.user
+        if isinstance(obj,Patient):
+            return obj.user == request.user
+        if isinstance (obj,Appointment):
+            return obj.patient.user==request.user
 
 class CanViewPatientRecords(BasePermission):
     message = "Access denied. You do not have permission to view patient records."

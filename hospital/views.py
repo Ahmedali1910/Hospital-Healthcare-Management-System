@@ -1,3 +1,4 @@
+from django.http import request
 from django.shortcuts import render
 
 from rest_framework import viewsets, filters
@@ -6,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from django_filters.rest_framework import DjangoFilterBackend
 
-from .models import Department, Patient, Doctor, Appointment,Medical_Consultation,surgery,Follow_UP
+from .models import Department, Patient, Doctor, Appointment,Medical_Consultation,surgery,Follow_UP,Status
 from .serializers import DepartmentSerializer, DoctorAdminSerializer, PatientSerializer,DoctorSerializer,AppointmentSerializer,FollowUpSerializer,SurgerySerializer,MedicalConsultationSerializer
 
 from user.permssions import IsAdminRole, IsDoctor , IsDoctorRole,IsPatientRole,CanViewPatientRecords,CanViewUpdateRecords
@@ -130,14 +131,94 @@ class AppointmentViewset(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(patient=self.request.user.patient)  # user don't write patient_id in request body, it will be automatically set to the logged-in user
-    
+
+    @action(detail=True, methods=['patch'])
+    def cancel(self, request, pk=None):
+
+       appointment = self.get_object()
+
+       if appointment.status == Status.COMPLETED:
+         return Response(
+           {"detail": "Completed appointment cannot be cancelled."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+       
+       if request.user.role == 'Patient':
+
+          if appointment.patient.user != request.user:
+              return Response(
+                  {"detail": "You can only cancel your own appointments."},
+                  status=status.HTTP_403_FORBIDDEN
+              )
+ 
+       elif request.user.role == 'Doctor':
+
+          if appointment.doctor.user != request.user:
+              return Response(
+                  {"detail": "You can only cancel your own appointments."},
+                  status=status.HTTP_403_FORBIDDEN
+                )
+
+       elif request.user.role != 'Admin':
+
+           return Response(
+               {"detail": "Permission denied."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+       appointment.status = Status.CANCELLED
+       appointment.save()
+
+       return Response(
+            AppointmentSerializer(appointment).data
+        )
+    @action(detail=True, methods=['patch'])
+    def complete(self, request, pk=None):
+
+      appointment = self.get_object()
+
+      if appointment.status == Status.CANCELLED:
+          return Response(
+             {"detail": "Cancelled appointment cannot be completed."},
+              status=status.HTTP_400_BAD_REQUEST
+            )
+
+      if request.user.role == 'Doctor':
+
+           if appointment.doctor.user != request.user:
+             return Response(
+                   {"detail": "You can only complete your own appointments."},
+                  status=status.HTTP_403_FORBIDDEN
+              )
+
+      elif request.user.role != 'Admin':
+
+           return Response(
+                {"detail": "Only doctor or admin can complete an appointment."},
+                  status=status.HTTP_403_FORBIDDEN
+               )
+
+      appointment.status = Status.COMPLETED
+      appointment.save()
+
+      return Response(
+         AppointmentSerializer(appointment).data
+        )
     def get_permissions(self):
         if self.action == 'create':
             permission_classes = [IsAuthenticated,(IsPatientRole | IsAdminRole)]
         elif self.action in ['list', 'retrieve']:
             permission_classes = [IsAuthenticated, CanViewUpdateRecords]
         elif self.action in ['update', 'partial_update']:
-            permission_classes = [IsAuthenticated,CanViewUpdateRecords]
+            permission_classes = [IsAuthenticated,IsPatientRole | IsAdminRole]
+        elif self.action in ['complete']:
+            permission_classes = [
+                IsAuthenticated, (IsDoctorRole | IsAdminRole)
+            ]
+        elif self.action in ['cancel']:
+            permission_classes = [
+                IsAuthenticated, (IsPatientRole | IsDoctorRole | IsAdminRole)
+            ]
         elif self.action == 'destroy':
             permission_classes = [IsAuthenticated, IsAdminRole]
         return [permission() for permission in permission_classes]
@@ -145,7 +226,7 @@ class AppointmentViewset(viewsets.ModelViewSet):
     def get_queryset(self):
             user=self.request.user
     
-            if user.role == 'ADMIN':
+            if user.role == 'Admin':
                 return Appointment.objects.all()
             elif user.role == 'Doctor':
                 return Appointment.objects.filter(doctor__user=user)
