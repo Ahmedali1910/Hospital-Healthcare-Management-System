@@ -315,13 +315,11 @@ class DepartmentViewset(viewsets.ModelViewSet):
     serializer_class = DepartmentSerializer
 
     def get_permissions(self):
-        if self.action == 'create':
+        if self.action in ['list', 'retrieve']:
+            permission_classes = [AllowAny]
+
+        elif self.action in ['create', 'update', 'partial_update', 'destroy']:
             permission_classes = [IsAuthenticated, IsAdminRole]
-        elif self.action in ['list', 'retrieve']:
-            permission_classes = [IsAuthenticated ,(IsAdminRole | IsDoctorRole)]
-        elif self.action in ['update', 'partial_update']:
-            permission_classes = [IsAuthenticated, IsAdminRole]
-        elif self.action == 'destroy':
-            permission_classes = [IsAuthenticated, IsAdminRole]
+
         return [permission() for permission in permission_classes]
         
