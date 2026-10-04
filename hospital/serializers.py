@@ -32,6 +32,21 @@ class DoctorSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'email', 'name', 'department', 'phone','status']   
         read_only_fields = ['status']  # Make the status field read-only
 
+class DoctorAdminSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(
+        source='user.username',
+        read_only=True
+    )
+
+    email = serializers.EmailField(
+        source='user.email',
+        read_only=True
+    )
+    
+    class Meta:
+        model = Doctor
+        fields = ['id', 'username', 'email', 'name', 'department', 'phone','status']        
+
 class AppointmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Appointment

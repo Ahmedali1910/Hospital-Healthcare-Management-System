@@ -7,7 +7,7 @@ from rest_framework.decorators import action
 from django_filters.rest_framework import DjangoFilterBackend
 
 from .models import Department, Patient, Doctor, Appointment,Medical_Consultation,surgery,Follow_UP
-from .serializers import DepartmentSerializer, PatientSerializer,DoctorSerializer,AppointmentSerializer,FollowUpSerializer,SurgerySerializer,MedicalConsultationSerializer
+from .serializers import DepartmentSerializer, DoctorAdminSerializer, PatientSerializer,DoctorSerializer,AppointmentSerializer,FollowUpSerializer,SurgerySerializer,MedicalConsultationSerializer
 
 from user.permssions import IsAdminRole, IsDoctor , IsDoctorRole,IsPatientRole,CanViewPatientRecords,CanViewUpdateRecords
 
@@ -115,6 +115,15 @@ class DoctorViewset(viewsets.ModelViewSet):
         if self.action == 'list':
             return Doctor.objects.filter(status='approved')
         return Doctor.objects.all()
+
+
+class DoctorAdminViewset(viewsets.ModelViewSet):
+    queryset = Doctor.objects.all()
+    serializer_class = DoctorAdminSerializer
+    permission_classes = [IsAuthenticated, IsAdminRole]
+
+
+    
 
 class AppointmentViewset(viewsets.ModelViewSet):
     serializer_class = AppointmentSerializer
