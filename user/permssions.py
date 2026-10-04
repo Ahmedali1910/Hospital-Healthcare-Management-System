@@ -21,8 +21,11 @@ class IsDoctorRole (BasePermission):
     def has_object_permission(self, request, view, obj):
         if isinstance(obj,Doctor):
                 return obj.user == request.user
-        if isinstance (obj,Appointment):
+        elif isinstance (obj,Appointment):
                 return obj.doctor.user==request.user
+        elif isinstance (obj,Medical_Consultation):
+                return obj.appointment.doctor.user==request.user
+        
     
 class IsPatientRole (BasePermission):
     message = "Access denied. Patient role required."
@@ -33,7 +36,7 @@ class IsPatientRole (BasePermission):
     def has_object_permission(self, request, view, obj):
         if isinstance(obj,Patient):
             return obj.user == request.user
-        if isinstance (obj,Appointment):
+        elif isinstance (obj,Appointment):
             return obj.patient.user==request.user
 
 class CanViewPatientRecords(BasePermission):

@@ -101,7 +101,10 @@ class MedicalConsultationSerializer(serializers.ModelSerializer):
         fields = '__all__' 
 
     def validate(self, data):# I use it specifically when the `action` value is 'create' to ensure that the doctor is the same one assigned to the appointment.
-      appointment = data['appointment']
+      appointment = data.get(
+            'appointment',
+             self.instance.appointment if self.instance else None
+            )
       request=self.context['request']
       if request.user.role != 'ADMIN':
            if appointment.doctor.user != request.user:
