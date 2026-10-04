@@ -5,7 +5,14 @@ class IsAdminRole(BasePermission):
 
     def has_permission(self, request, view):
         return bool(request.user.role =='Admin')
+class IsDoctor(BasePermission):
+    message = "Access denied. Doctor role required."
 
+    def has_permission(self, request, view):
+        return ( request.user.is_authenticated and request.user.role == 'Doctor' )    
+    def has_object_permission(self, request, view, obj):
+            return obj.user == request.user
+        
 class IsDoctorRole (BasePermission):
     message = "Access denied. Doctor role required."
 

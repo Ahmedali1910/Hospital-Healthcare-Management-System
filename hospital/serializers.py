@@ -29,7 +29,8 @@ class DoctorSerializer(serializers.ModelSerializer):
     
      class Meta:
         model = Doctor
-        fields = ['id', 'username', 'email', 'name', 'department', 'phone']   
+        fields = ['id', 'username', 'email', 'name', 'department', 'phone','status']   
+        read_only_fields = ['status']  # Make the status field read-only
 
 class AppointmentSerializer(serializers.ModelSerializer):
     class Meta:

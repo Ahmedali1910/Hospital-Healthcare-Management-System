@@ -9,11 +9,32 @@ from django_filters.rest_framework import DjangoFilterBackend
 from .models import Department, Patient, Doctor, Appointment,Medical_Consultation,surgery,Follow_UP
 from .serializers import DepartmentSerializer, PatientSerializer,DoctorSerializer,AppointmentSerializer,FollowUpSerializer,SurgerySerializer,MedicalConsultationSerializer
 
-from user.permssions import IsAdminRole , IsDoctorRole,IsPatientRole,CanViewPatientRecords,CanViewUpdateRecords
+from user.permssions import IsAdminRole, IsDoctor , IsDoctorRole,IsPatientRole,CanViewPatientRecords,CanViewUpdateRecords
 
 class PatientViewset(viewsets.ModelViewSet):
     serializer_class = PatientSerializer
-   
+
+    @action(detail=False,methods=['patch','put'],permission_classes=[IsAuthenticated,(IsPatientRole | IsAdminRole)])
+    def me(self, request):
+       patient = request.user.patient
+       if request.method == 'PATCH':
+           serializer = PatientSerializer(
+               patient,
+               data=request.data,
+               partial=True
+           )
+           serializer.is_valid(raise_exception=True)
+           serializer.save()
+           return Response(serializer.data)
+       elif request.method == 'PUT':
+           serializer = PatientSerializer(
+               patient,
+               data=request.data
+           )
+           serializer.is_valid(raise_exception=True)
+           serializer.save()
+           return Response(serializer.data)         
+       
 
     def get_permissions(self):
         if self.action == 'create':
@@ -22,6 +43,8 @@ class PatientViewset(viewsets.ModelViewSet):
             permission_classes = [IsAuthenticated,(IsPatientRole | CanViewPatientRecords)]
         elif self.action in ['update', 'partial_update']:
             permission_classes = [IsAuthenticated,(IsPatientRole | IsAdminRole)]
+        elif self.action == 'me':
+            permission_classes = [IsAuthenticated, (IsPatientRole | IsAdminRole)]    
         elif self.action == 'destroy':
             permission_classes = [IsAuthenticated, IsAdminRole]    
         return [permission() for permission in permission_classes]
@@ -53,6 +76,24 @@ class DoctorViewset(viewsets.ModelViewSet):
         serializer = DoctorSerializer(pending_doctors, many=True)
         return Response(serializer.data)
 
+    @action(detail=False,methods=['get', 'patch','put'],permission_classes=[IsAuthenticated, IsDoctor])
+    def me(self, request):
+        doctor = request.user.doctor
+
+        if request.method == 'GET':
+             serializer = DoctorSerializer(doctor)
+             return Response(serializer.data)
+        elif request.method in ['PATCH']:
+            serializer = DoctorSerializer(doctor,data=request.data,partial=True)
+            serializer.is_valid(raise_exception=True) 
+            serializer.save()
+            return Response(serializer.data)
+        elif request.method in ['PUT']:
+            serializer = DoctorSerializer(doctor,data=request.data)
+            serializer.is_valid(raise_exception=True) 
+            serializer.save()
+            return Response(serializer.data)
+
     
     def get_permissions(self):
         if self.action == 'create':
@@ -60,7 +101,11 @@ class DoctorViewset(viewsets.ModelViewSet):
         elif self.action in ['list','retrieve']:
             permission_classes = [AllowAny]
         elif self.action in ['update', 'partial_update']:
-            permission_classes = [IsAuthenticated ,(IsDoctorRole | IsAdminRole)]
+            permission_classes = [IsAuthenticated ,(IsDoctor | IsAdminRole)]
+        elif self.action == 'me':
+            permission_classes = [IsAuthenticated, IsDoctor]
+        elif self.action == 'pending_doctors':
+            permission_classes = [IsAuthenticated, IsAdminRole]    
         elif self.action == 'destroy':
             permission_classes = [IsAuthenticated, IsAdminRole]
         return [permission() for permission in permission_classes]  
