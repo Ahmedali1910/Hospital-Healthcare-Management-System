@@ -25,6 +25,8 @@ class IsDoctorRole (BasePermission):
                 return obj.doctor.user==request.user
         elif isinstance (obj,Medical_Consultation):
                 return obj.appointment.doctor.user==request.user
+        elif isinstance (obj,surgery):
+                return obj.medical_consultation.appointment.doctor.user==request.user
         
     
 class IsPatientRole (BasePermission):

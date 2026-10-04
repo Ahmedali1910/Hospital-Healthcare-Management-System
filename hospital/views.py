@@ -269,7 +269,7 @@ class SurgeryViewset(viewsets.ModelViewSet):
         elif self.action in ['list', 'retrieve']:
             permission_classes = [IsAuthenticated, CanViewUpdateRecords]
         elif self.action in ['update', 'partial_update']:
-            permission_classes = [IsAuthenticated, CanViewUpdateRecords]
+            permission_classes = [IsAuthenticated, IsDoctorRole|IsAdminRole]
         elif self.action == 'destroy':
             permission_classes = [IsAuthenticated, IsAdminRole]
         return [permission() for permission in permission_classes]    
