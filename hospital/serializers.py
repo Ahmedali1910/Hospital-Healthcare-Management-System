@@ -27,7 +27,11 @@ class DoctorSerializer(serializers.ModelSerializer):
         source='user.email',
         read_only=True
     )
-    
+     department = serializers.CharField(
+        source='department.name',
+        read_only=True
+    )
+
      class Meta:
         model = Doctor
         fields = ['id', 'username', 'email', 'name', 'department', 'phone','status']   

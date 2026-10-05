@@ -1,5 +1,6 @@
 from django.http import request
 from django.shortcuts import render
+import django_filters
 
 from rest_framework import viewsets, filters
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -61,12 +62,24 @@ class PatientViewset(viewsets.ModelViewSet):
             return Patient.objects.filter(user=user)
 
 
+
+class DoctorFilter(django_filters.FilterSet):
+
+    department = django_filters.CharFilter(
+        field_name='department__name',
+        lookup_expr='iexact'
+    )
+
+    class Meta:
+        model = Doctor
+        fields = ['department']
+
 class DoctorViewset(viewsets.ModelViewSet):
     queryset = Doctor.objects.all()
     serializer_class = DoctorSerializer
 
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['department__name']
+    filterset_class = DoctorFilter
     search_fields = ['name']
     ordering_fields = [ 'department__name' , 'name']
     ordering = ['department__name', 'name']  # by default, order by department name and then by doctor name
