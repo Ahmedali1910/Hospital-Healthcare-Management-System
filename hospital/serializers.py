@@ -15,6 +15,7 @@ class PatientSerializer(serializers.ModelSerializer):
      class Meta:
         model = Patient
         fields = ['id', 'username', 'email', 'name', 'age', 'phone','doctor']
+        read_only_fields = ['id']  # Make the id field read-only
 
 class DoctorSerializer(serializers.ModelSerializer):
      username = serializers.CharField(
@@ -30,7 +31,7 @@ class DoctorSerializer(serializers.ModelSerializer):
      class Meta:
         model = Doctor
         fields = ['id', 'username', 'email', 'name', 'department', 'phone','status']   
-        read_only_fields = ['status']  # Make the status field read-only
+        read_only_fields = ['id','status']  # Make the status field read-only
 
 class DoctorAdminSerializer(serializers.ModelSerializer):
     username = serializers.CharField(
