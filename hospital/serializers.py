@@ -27,14 +27,21 @@ class DoctorSerializer(serializers.ModelSerializer):
         source='user.email',
         read_only=True
     )
-     department = serializers.CharField(
+     # for creatind or updateing a doctor, the frontend will send department_id in request body, so we need to use PrimaryKeyRelatedField to get the department object from the department_id
+     department = serializers.PrimaryKeyRelatedField(
+        queryset=Department.objects.all(),
+        required=False,
+    )
+    # for displaying the department name in the response, we need to use CharField with source='department.name' to get the department name from the department object
+     department_name = serializers.CharField(
         source='department.name',
-        read_only=True
+        read_only=True,
+        allow_null=True,
     )
 
      class Meta:
         model = Doctor
-        fields = ['id', 'username', 'email', 'name', 'department', 'phone','status']   
+        fields = ['id', 'username', 'email', 'name', 'department', 'department_name', 'phone','status']   
         read_only_fields = ['id','status']  # Make the status field read-only
 
 class DoctorAdminSerializer(serializers.ModelSerializer):
@@ -47,14 +54,18 @@ class DoctorAdminSerializer(serializers.ModelSerializer):
         source='user.email',
         read_only=True
     )
-    department = serializers.CharField(
-            source='department.name',
-            read_only=True
-        )
-    
+    department = serializers.PrimaryKeyRelatedField(
+        queryset=Department.objects.all(),
+        required=False,
+    )
+    department_name = serializers.CharField(
+        source='department.name',
+        read_only=True,
+        allow_null=True,
+    )
     class Meta:
         model = Doctor
-        fields = ['id', 'username', 'email', 'name', 'department', 'phone','status']        
+        fields = ['id', 'username', 'email', 'name', 'department', 'department_name', 'phone','status']        
 
 class AppointmentSerializer(serializers.ModelSerializer):
 
@@ -62,6 +73,7 @@ class AppointmentSerializer(serializers.ModelSerializer):
         model = Appointment
         fields = [
             'id',
+            'patient',
             'doctor',
             'date',
             'time',
