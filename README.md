@@ -356,14 +356,13 @@ Full interactive API documentation (endpoints, request bodies, responses, and ex
 
 ![API endpoints overview](docs/apidog-endpoints.png)
 
-**Patient login** (returns JWT access and refresh tokens)
-
-![Patient login](docs/login-patient.png)
-
-**Pending doctors** (admin-only endpoint listing doctors waiting for approval)
-
-![Pending doctors](docs/pending-doctors.png)
-
+**Doctor's patients** (a doctor only sees the patients who chose them as their ongoing doctor)
+ 
+![Doctor's patients](docs/doctor-patients.png)
+ 
+**Doctor's profile** (an approved doctor with the department they selected)
+ 
+![Doctor's profile](docs/doctor-profile.png)
 ---
 
 ## 9. Database / ERD
