@@ -15,6 +15,9 @@ A RESTful backend API for the Hospital Healthcare Management System, a centraliz
 7. [How to Run](#7-how-to-run)
 8. [API Documentation](#8-api-documentation)
 9. [Database / ERD](#9-database--erd)
+10. [Project Structure](#10-project-structure)
+11. [Future Improvements](#11-future-improvements)
+12. [Author](#12-author)
 
 ---
 
@@ -185,8 +188,8 @@ Scheduled ──┤
 **1. Clone the repository**
 
 ```bash
-git clone <your-repository-url>
-cd <your-project-folder>
+git clone https://github.com/Ahmedali1910/Hospital-Healthcare-Management-System.git
+cd Hospital-Healthcare-Management-System
 ```
 
 **2. Install dependencies**
@@ -347,6 +350,20 @@ Full interactive API documentation (endpoints, request bodies, responses, and ex
 
 👉 **[https://p2ecdyxrpp.apidog.io](https://p2ecdyxrpp.apidog.io)**
 
+### Screenshots
+
+**API endpoints overview** (grouped into `auth`, `patient`, and `doctor` folders)
+
+![API endpoints overview](docs/apidog-endpoints.png)
+
+**Patient login** (returns JWT access and refresh tokens)
+
+![Patient login](docs/login-patient.png)
+
+**Pending doctors** (admin-only endpoint listing doctors waiting for approval)
+
+![Pending doctors](docs/pending-doctors.png)
+
 ---
 
 ## 9. Database / ERD
@@ -354,6 +371,8 @@ Full interactive API documentation (endpoints, request bodies, responses, and ex
 The final Entity Relationship Diagram is available on Lucidchart:
 
 👉 **[View the ERD on Lucidchart](https://lucid.app/lucidchart/217df6f3-fd5a-4dd7-a50c-47fd736a2e14/edit?invitationId=inv_b23a6804-909b-4830-8ceb-4b0d6a07ddcd&page=0_0#)**
+
+![ERD](docs/erd.png)
 
 ### Design notes
 
@@ -377,7 +396,7 @@ The final Entity Relationship Diagram is available on Lucidchart:
 
 ---
 
-## Project Structure
+## 10. Project Structure
 
 ```
 .
@@ -390,3 +409,21 @@ The final Entity Relationship Diagram is available on Lucidchart:
 ├── .env.example
 └── README.md
 ```
+
+---
+
+## 11. Future Improvements
+
+- Add automated tests for the API endpoints and permissions.
+- Add pagination to the list endpoints.
+- Deploy the API to a hosting platform with a production database.
+- Add email notifications for appointment confirmations and doctor approval.
+
+---
+
+## 12. Author
+
+**Ahmed Ali**
+
+- GitHub: [Ahmedali1910](https://github.com/Ahmedali1910)
+- LinkedIn: <your-linkedin-url>
