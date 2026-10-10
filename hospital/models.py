@@ -50,6 +50,7 @@ class Medical_Consultation(models.Model):
      type_Of_Medical_Consultation=models.CharField(max_length=100)
      status=models.CharField(max_length=20,choices=Status.choices,default=Status.SCHEDULED)
      diagnosis=models.TextField(blank=True)
+     symptoms=models.TextField(blank=True)
      treatment=models.TextField(blank=True)
      notes=models.TextField(blank=True)
      appointment=models.OneToOneField(Appointment,on_delete=models.CASCADE) #frontend will send appointment_id in request body, because the medical consultation is created after the appointment is created, and it will be used to create the medical consultation, this include patient_id and doctor_id because the appointment include patient_id and doctor_id
