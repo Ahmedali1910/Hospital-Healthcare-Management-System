@@ -425,4 +425,4 @@ The final Entity Relationship Diagram is available on Lucidchart:
 **Ahmed Ali**
 
 - GitHub: [Ahmedali1910](https://github.com/Ahmedali1910)
-- LinkedIn: <your-linkedin-url>
+- LinkedIn: [Ahmed Ali](https://www.linkedin.com/feed/update/urn:li:activity:7514912703229026304/)
